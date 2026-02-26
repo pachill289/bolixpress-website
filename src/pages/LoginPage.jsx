@@ -1,25 +1,28 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Loader2, Mail, Lock, ShoppingBag } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Loader2, Mail, Lock, ShoppingBag } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { loginWithEmail, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
 
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || "/";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,15 +35,15 @@ export default function LoginPage() {
     try {
       await loginWithEmail(formData.email, formData.password);
       toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in."
+        title: t("msg_login_1"),
+        description: t("submsg_login_1"),
       });
       navigate(from, { replace: true });
     } catch (error) {
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
-        variant: "destructive"
+        title: t("msg_login_2"),
+        description: error.message || t("submsg_login_2"),
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -53,14 +56,14 @@ export default function LoginPage() {
       await loginWithGoogle();
       toast({
         title: "Welcome!",
-        description: "Successfully logged in with Google."
+        description: "Successfully logged in with Google.",
       });
       navigate(from, { replace: true });
     } catch (error) {
       toast({
         title: "Google Login Failed",
         description: error.message || "Could not log in with Google.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsGoogleLoading(false);
@@ -70,7 +73,7 @@ export default function LoginPage() {
   return (
     <>
       <Helmet>
-        <title>Login - Tech Store</title>
+        <title>Login - Bolixpress</title>
         <meta name="description" content="Log in to your ShopHub account" />
       </Helmet>
 
@@ -83,19 +86,21 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-card w-full max-w-md p-8 rounded-2xl border shadow-sm"
           >
+            <img
+              className="w-2/5 h-2/5 m-auto"
+              src="/logo_mejorado_icono_transparente.svg"
+              alt="logo bolixpress"
+            />
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 mb-4">
-                <ShoppingBag className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold">Welcome back</h1>
+              <h1 className="text-2xl font-bold">{t("title_login_1")}</h1>
               <p className="text-muted-foreground mt-2 text-sm">
-                Enter your details to access your account
+                {t("subtitle_login_1")}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("label_login_1")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
@@ -106,23 +111,27 @@ export default function LoginPage() {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full pl-10 pr-4 py-2 border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                    placeholder="you@example.com"
+                    placeholder={t("login_placeholder_email")}
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link 
-                    to="#" 
+                  <Label htmlFor="password">{t("label_login_2")}</Label>
+                  <Link
+                    to="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      toast({ title: "Not implemented", description: "Forgot password flow is not available yet." });
+                      toast({
+                        title: "Not implemented",
+                        description:
+                          "Forgot password flow is not available yet.",
+                      });
                     }}
                     className="text-sm text-primary hover:underline"
                   >
-                    Forgot Password?
+                    {t("subtitle_login_3")}
                   </Link>
                 </div>
                 <div className="relative">
@@ -140,15 +149,23 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Log In
+              <Button
+                type="submit"
+                className="w-full mt-6"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {t("button_5")}
               </Button>
             </form>
 
             <div className="mt-6 flex items-center">
               <div className="flex-grow border-t border-muted" />
-              <span className="flex-shrink-0 mx-4 text-muted-foreground text-sm">or continue with</span>
+              <span className="flex-shrink-0 mx-4 text-muted-foreground text-sm">
+                {t("subtitle_login_2")}
+              </span>
               <div className="flex-grow border-t border-muted" />
             </div>
 
@@ -187,9 +204,12 @@ export default function LoginPage() {
             </div>
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="font-medium text-primary hover:underline">
-                Register
+              {t("subtitle_login_4")}{" "}
+              <Link
+                to="/register"
+                className="font-medium text-primary hover:underline"
+              >
+                {t("subtitle_login_5")}
               </Link>
             </p>
           </motion.div>

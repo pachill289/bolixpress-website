@@ -41,5 +41,19 @@
   "footer_title_4": "Subscribe to our newsletter",
   "footer_placeholder_email": "Enter your email",
   "footer_rigths": "All rights reserved.",
-  "footer_button": "Subscribe"
+  "footer_button": "Subscribe",
+  "title_login_1": "Welcome back",
+  "subtitle_login_1": "Enter your details to access your account",
+  "label_login_1": "Email",
+  "label_login_2": "Password",
+  "subtitle_login_2": "or continue with",
+  "subtitle_login_3": "Forgot Password?",
+  "subtitle_login_4": "Don't have an account?",
+  "subtitle_login_5": "Register",
+  "button_5": "Log In",
+  "msg_login_1": "Welcome back!",
+  "submsg_login_1": "You have successfully logged in.",
+  "msg_login_2": "Login Failed",
+  "submsg_login_2": "Invalid credentials. Please try again.",
+  "login_placeholder_email": "you@example.com"
 }

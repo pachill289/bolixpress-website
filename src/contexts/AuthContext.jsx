@@ -1,97 +1,65 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'firebase/auth';
-import bcrypt from 'bcryptjs';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
+import bcrypt from "bcryptjs";
 
 const AuthContext = createContext();
-
-// Firebase configuration from environment variables
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
-
-// Initialize Firebase
-let app, auth;
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-} catch (error) {
-  console.warn('Firebase not configured. Using mock auth for development.');
-}
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // 🔹 Cargar sesión al iniciar
   useEffect(() => {
-    // Check localStorage first for local users
-    const localUser = localStorage.getItem('currentUser');
+    const localUser = localStorage.getItem("currentUser");
+
     if (localUser) {
       setCurrentUser(JSON.parse(localUser));
       setLoading(false);
-      return;
     }
 
-    if (!auth) {
-      setLoading(false);
-      return;
+    // Firebase listener SOLO para Google
+    if (auth) {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const mappedUser = {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            authProvider: "google",
+          };
+
+          setCurrentUser(mappedUser);
+          localStorage.setItem("currentUser", JSON.stringify(mappedUser));
+        }
+        setLoading(false);
+      });
+
+      return unsubscribe;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const mappedUser = {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          authProvider: 'google'
-        };
-        setCurrentUser(mappedUser);
-        localStorage.setItem('currentUser', JSON.stringify(mappedUser));
-      }
-      setLoading(false);
-      setError(null);
-    }, (error) => {
-      setError(error.message);
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    setLoading(false);
   }, []);
 
+  // Login con Google (Firebase real)
   const loginWithGoogle = async () => {
-    if (!auth) {
-      const mockUser = {
-        uid: 'mock-google-123',
-        email: 'google@example.com',
-        displayName: 'Google Demo User',
-        photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Google',
-        authProvider: 'google'
-      };
-      localStorage.setItem('currentUser', JSON.stringify(mockUser));
-      setCurrentUser(mockUser);
-      return mockUser;
-    }
-
     try {
       setError(null);
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleProvider);
+
       const mappedUser = {
         uid: result.user.uid,
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
-        authProvider: 'google'
+        authProvider: "google",
       };
-      localStorage.setItem('currentUser', JSON.stringify(mappedUser));
+
+      localStorage.setItem("currentUser", JSON.stringify(mappedUser));
       setCurrentUser(mappedUser);
+
       return mappedUser;
     } catch (error) {
       setError(error.message);
@@ -99,43 +67,36 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Registro local (modo demo)
   const registerWithEmail = async (userData) => {
     try {
       setError(null);
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      if (users.find(u => u.email === userData.email)) {
-        throw new Error('An account with this email already exists');
-      }
-      if (users.find(u => u.username === userData.username)) {
-        throw new Error('This username is already taken');
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      if (users.find((u) => u.email === userData.email)) {
+        throw new Error("Email already exists");
       }
 
-      const salt = bcrypt.genSaltSync(10);
-      const hashedPassword = bcrypt.hashSync(userData.password, salt);
+      const hashedPassword = bcrypt.hashSync(userData.password, 10);
 
       const newUser = {
         id: `usr_${Date.now()}`,
-        username: userData.username,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        dateOfBirth: userData.dateOfBirth,
-        email: userData.email,
-        phone: userData.phone,
-        address: userData.address,
+        ...userData,
         password: hashedPassword,
+        authProvider: "local",
         createdAt: new Date().toISOString(),
-        authProvider: 'local'
       };
 
       users.push(newUser);
-      localStorage.setItem('users', JSON.stringify(users));
+      localStorage.setItem("users", JSON.stringify(users));
 
       const sessionUser = { ...newUser };
       delete sessionUser.password;
-      
+
+      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
       setCurrentUser(sessionUser);
-      localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+
       return sessionUser;
     } catch (error) {
       setError(error.message);
@@ -143,26 +104,25 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Login local (modo demo)
   const loginWithEmail = async (email, password) => {
     try {
       setError(null);
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const user = users.find(u => u.email === email);
-      
-      if (!user) {
-        throw new Error('Invalid email or password');
-      }
+
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const user = users.find((u) => u.email === email);
+
+      if (!user) throw new Error("Invalid email or password");
 
       const isMatch = bcrypt.compareSync(password, user.password);
-      if (!isMatch) {
-        throw new Error('Invalid email or password');
-      }
+      if (!isMatch) throw new Error("Invalid email or password");
 
       const sessionUser = { ...user };
       delete sessionUser.password;
 
+      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
       setCurrentUser(sessionUser);
-      localStorage.setItem('currentUser', JSON.stringify(sessionUser));
+
       return sessionUser;
     } catch (error) {
       setError(error.message);
@@ -170,13 +130,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Logout híbrido
   const logout = async () => {
     try {
       setError(null);
-      if (auth && currentUser?.authProvider === 'google') {
+
+      if (currentUser?.authProvider === "google" && auth) {
         await signOut(auth);
       }
-      localStorage.removeItem('currentUser');
+
+      localStorage.removeItem("currentUser");
       setCurrentUser(null);
     } catch (error) {
       setError(error.message);
@@ -192,12 +155,12 @@ export function AuthProvider({ children }) {
     logout,
     loading,
     error,
-    isAuthenticated: !!currentUser
+    isAuthenticated: !!currentUser,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }
@@ -205,7 +168,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

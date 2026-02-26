@@ -52,7 +52,11 @@ export default function Footer() {
   const socialLinks = [
     { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
     { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+    {
+      icon: Instagram,
+      href: "https://www.instagram.com/bolix_press?igsh=MXd1OHJqMWlhcWl6eg==",
+      label: "Instagram",
+    },
     { icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
   ];
 
@@ -62,11 +66,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand & Newsletter */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center space-x-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-xl">S</span>
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="h-14 w-14 rounded-lg bg-gradient-to-br flex items-center justify-center">
+                <img src="/bolixpress-isotipo.svg" alt="logo bolixpress" />
               </div>
-              <span className="font-bold text-xl">BolixPress</span>
+              <span className="font-bold text-3xl sm:block italic">
+                <span className="text-blue-800">Bolix</span>
+                <span className="text-red-800">press</span>
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground mb-4">
               {t("description_footer")}
@@ -146,7 +154,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} BolixPress. {t("footer_rigths")}
+            © {new Date().getFullYear()} Bolixpress. {t("footer_rigths")}
           </p>
 
           {/* Social Links */}

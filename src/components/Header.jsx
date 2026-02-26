@@ -78,11 +78,12 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">S</span>
+            <div className="h-14 w-14 rounded-lg bg-gradient-to-br flex items-center justify-center">
+              <img src="/bolixpress-isotipo.svg" alt="logo bolixpress" />
             </div>
-            <span className="font-bold text-xl hidden sm:block">
-              BolixPress
+            <span className="font-bold text-3xl sm:block italic">
+              <span className="text-blue-800">Bolix</span>
+              <span className="text-red-800">press</span>
             </span>
           </Link>
 

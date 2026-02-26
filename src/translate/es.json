@@ -41,5 +41,19 @@
   "footer_title_4": "Suscríbete a nuestro boletín",
   "footer_placeholder_email": "Ingresa tu correo electrónico",
   "footer_rigths": "Todos los derechos reservados.",
-  "footer_button": "Suscríbete"
+  "footer_button": "Suscríbete",
+  "title_login_1": "Bienvenido de nuevo",
+  "subtitle_login_1": "Ingresa tus datos para acceder a tu cuenta",
+  "label_login_1": "Correo electrónico",
+  "label_login_2": "Contraseña",
+  "subtitle_login_2": "o continúa con",
+  "subtitle_login_3": "¿Olvidaste tu contraseña?",
+  "subtitle_login_4": "¿No tiene una cuenta?",
+  "subtitle_login_5": "Regístrese",
+  "button_5": "Iniciar sesión",
+  "msg_login_1": "¡Bienvenido de nuevo!",
+  "submsg_login_1": "Has iniciado sesión correctamente.",
+  "msg_login_2": "Error al iniciar sesión",
+  "submsg_login_2": "Credenciales inválidas. Por favor, inténtalo nuevamente.",
+  "login_placeholder_email": "nombre_correo@dominio.com"
 }

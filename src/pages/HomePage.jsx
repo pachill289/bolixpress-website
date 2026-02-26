@@ -100,7 +100,7 @@ export default function HomePage() {
   return (
     <>
       <Helmet>
-        <title>BolixPress</title>
+        <title>Bolixpress</title>
         <meta
           name="description"
           content="Shop the latest products at unbeatable prices. Fast delivery, secure payments, and exceptional customer service."
