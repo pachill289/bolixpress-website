@@ -67,7 +67,7 @@ export default function Footer() {
           {/* Brand & Newsletter */}
           <div className="lg:col-span-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               <div className="h-14 w-14 rounded-lg bg-gradient-to-br flex items-center justify-center">
                 <img src="/bolixpress-isotipo.svg" alt="logo bolixpress" />
               </div>
@@ -75,7 +75,7 @@ export default function Footer() {
                 <span className="text-blue-800">Bolix</span>
                 <span className="text-red-800">press</span>
               </span>
-            </Link>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">
               {t("description_footer")}
             </p>
