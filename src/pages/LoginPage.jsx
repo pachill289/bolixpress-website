@@ -42,7 +42,7 @@ export default function LoginPage() {
     } catch (error) {
       toast({
         title: t("msg_login_2"),
-        description: error.message || t("submsg_login_2"),
+        description: error.response?.data?.message || error.message,
         variant: "destructive",
       });
     } finally {
@@ -62,7 +62,7 @@ export default function LoginPage() {
     } catch (error) {
       toast({
         title: "Google Login Failed",
-        description: error.message || "Could not log in with Google.",
+        description: error.response?.data?.message || error.message,
         variant: "destructive",
       });
     } finally {

@@ -1,174 +1,90 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { signInWithPopup, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
-import bcrypt from "bcryptjs";
+import {
+  registerRequest,
+  loginRequest,
+  googleLoginRequest,
+} from "@/services/auth.service";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  // 🔹 Cargar sesión al iniciar
+  // Cargar sesión guardada
   useEffect(() => {
-    const localUser = localStorage.getItem("currentUser");
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-    if (localUser) {
-      setCurrentUser(JSON.parse(localUser));
-      setLoading(false);
-    }
-
-    // Firebase listener SOLO para Google
-    if (auth) {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          const mappedUser = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            authProvider: "google",
-          };
-
-          setCurrentUser(mappedUser);
-          localStorage.setItem("currentUser", JSON.stringify(mappedUser));
-        }
-        setLoading(false);
-      });
-
-      return unsubscribe;
+    if (storedUser && token) {
+      setCurrentUser(JSON.parse(storedUser));
     }
 
     setLoading(false);
   }, []);
 
-  // Login con Google (Firebase real)
-  const loginWithGoogle = async () => {
-    try {
-      setError(null);
-      const result = await signInWithPopup(auth, googleProvider);
+  // Guarda la sesión del usuario
+  const saveUserLocalStorage = (token, user) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-      const mappedUser = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-        authProvider: "google",
-      };
-
-      localStorage.setItem("currentUser", JSON.stringify(mappedUser));
-      setCurrentUser(mappedUser);
-
-      return mappedUser;
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    }
+    setCurrentUser(user);
   };
 
-  // Registro local (modo demo)
+  // Registro de usuario
   const registerWithEmail = async (userData) => {
-    try {
-      setError(null);
-
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-      if (users.find((u) => u.email === userData.email)) {
-        throw new Error("Email already exists");
-      }
-
-      const hashedPassword = bcrypt.hashSync(userData.password, 10);
-
-      const newUser = {
-        id: `usr_${Date.now()}`,
-        ...userData,
-        password: hashedPassword,
-        authProvider: "local",
-        createdAt: new Date().toISOString(),
-      };
-
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
-
-      const sessionUser = { ...newUser };
-      delete sessionUser.password;
-
-      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
-      setCurrentUser(sessionUser);
-
-      return sessionUser;
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    }
+    const data = await registerRequest(userData);
+    saveUserLocalStorage(data.token, data.user);
+    return data.user;
   };
 
-  // Login local (modo demo)
+  // Login con email
   const loginWithEmail = async (email, password) => {
-    try {
-      setError(null);
-
-      const users = JSON.parse(localStorage.getItem("users") || "[]");
-      const user = users.find((u) => u.email === email);
-
-      if (!user) throw new Error("Invalid email or password");
-
-      const isMatch = bcrypt.compareSync(password, user.password);
-      if (!isMatch) throw new Error("Invalid email or password");
-
-      const sessionUser = { ...user };
-      delete sessionUser.password;
-
-      localStorage.setItem("currentUser", JSON.stringify(sessionUser));
-      setCurrentUser(sessionUser);
-
-      return sessionUser;
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    }
+    const data = await loginRequest(email, password);
+    saveUserLocalStorage(data.token, data.user);
+    return data.user ? true : false;
   };
 
-  // Logout híbrido
+  // Login con Google
+  const loginWithGoogle = async () => {
+    // Firebase popup
+    const result = await signInWithPopup(auth, googleProvider);
+
+    // Obtener idToken
+    const idToken = await result.user.getIdToken();
+
+    // Enviarlo al backend
+    const data = await googleLoginRequest(idToken);
+
+    // Guardar sesión propia (NO la de Firebase)
+    saveUserLocalStorage(data.token, data.user);
+
+    return data.user;
+  };
+
   const logout = async () => {
-    try {
-      setError(null);
-
-      if (currentUser?.authProvider === "google" && auth) {
-        await signOut(auth);
-      }
-
-      localStorage.removeItem("currentUser");
-      setCurrentUser(null);
-    } catch (error) {
-      setError(error.message);
-      throw error;
-    }
-  };
-
-  const value = {
-    currentUser,
-    loginWithGoogle,
-    registerWithEmail,
-    loginWithEmail,
-    logout,
-    loading,
-    error,
-    isAuthenticated: !!currentUser,
+    await signOut(auth); // si fue google
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        currentUser,
+        registerWithEmail,
+        loginWithEmail,
+        loginWithGoogle,
+        logout,
+        isAuthenticated: !!currentUser,
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);
