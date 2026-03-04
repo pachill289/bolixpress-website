@@ -42,7 +42,12 @@ export default function LoginPage() {
     } catch (error) {
       toast({
         title: t("msg_login_2"),
-        description: error.response?.data?.message || error.message,
+        description:
+          error.response?.data?.message == "Invalid email or password"
+            ? t("submsg_login_2")
+            : error.response?.data?.message == "User not found"
+              ? t("submsg_login_3")
+              : error.response?.data?.message || error.message,
         variant: "destructive",
       });
     } finally {
@@ -60,9 +65,14 @@ export default function LoginPage() {
       });
       navigate(from, { replace: true });
     } catch (error) {
+      console.log(error.response?.data?.message);
+
       toast({
         title: "Google Login Failed",
-        description: error.response?.data?.message || error.message,
+        description:
+          error.response?.data?.message == "Invalid email or password"
+            ? t("submsg_login_2")
+            : "" || error.message,
         variant: "destructive",
       });
     } finally {

@@ -1,11 +1,14 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { X, ShoppingCart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { X, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPromptModal({ isOpen, onClose }) {
   const navigate = useNavigate();
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -26,38 +29,38 @@ export default function LoginPromptModal({ isOpen, onClose }) {
           >
             <X className="h-5 w-5" />
           </Button>
-          
+
           <div className="p-8 text-center">
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
               <ShoppingCart className="h-8 w-8 text-primary" />
             </div>
-            
-            <h2 className="text-2xl font-bold mb-2">Sign in to continue</h2>
+
+            <h2 className="text-2xl font-bold mb-2">{t("login_cart_title")}</h2>
             <p className="text-muted-foreground mb-8">
-              Please log in or create an account to add items to your cart and complete your purchase.
+              {t("login_cart_subtitle")}
             </p>
-            
+
             <div className="space-y-3">
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 size="lg"
                 onClick={() => {
                   onClose();
-                  navigate('/login');
+                  navigate("/login");
                 }}
               >
-                Log In
+                {t("login_cart_button_1")}
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 size="lg"
                 onClick={() => {
                   onClose();
-                  navigate('/register');
+                  navigate("/register");
                 }}
               >
-                Create an Account
+                {t("login_cart_button_2")}
               </Button>
             </div>
           </div>

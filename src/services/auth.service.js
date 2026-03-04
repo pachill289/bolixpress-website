@@ -1,17 +1,4 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
-});
-
-// Interceptor para enviar JWT automáticamente
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import API from "./api.service.js";
 
 // Registro de usuario
 export const registerRequest = async (data) => {

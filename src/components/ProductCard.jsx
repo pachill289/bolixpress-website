@@ -1,14 +1,30 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ShoppingCart, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
+import React from "react";
+import { useTranslation } from "react-i18next";
+
+import { motion } from "framer-motion";
+import { ShoppingCart, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
-  
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
+
+  // traducción de json de idiomas para el nombre del producto porque llega como:
+  /*
+  {
+    en: "Wireless Bluetooth Headphones",
+    es: "Auriculares Bluetooth inalámbricos"
+  }
+   */
+  const { i18n } = useTranslation();
+
   const discount = product.original_price
-    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    ? Math.round(
+        ((product.original_price - product.price) / product.original_price) *
+          100,
+      )
     : 0;
 
   return (
@@ -32,20 +48,25 @@ export default function ProductCard({ product }) {
         )}
         {product.stock < 10 && product.stock > 0 && (
           <div className="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-            Only {product.stock} left
+            {t("msg_cart_subtitle_1")} {product.stock} {t("msg_product_card_1")}
           </div>
         )}
         {product.stock === 0 && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">Out of Stock</span>
+            <span className="text-white font-bold text-lg">
+              {" "}
+              {t("msg_product_card_2")}
+            </span>
           </div>
         )}
       </div>
 
       <div className="p-4">
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-        <h3 className="font-semibold mb-2 line-clamp-2 min-h-[2.5rem]">{product.name}</h3>
-        
+        <h3 className="font-semibold mb-2 line-clamp-2 min-h-[2.5rem]">
+          {product.name[i18n.language]}
+        </h3>
+
         {/* Rating */}
         <div className="flex items-center gap-1 mb-3">
           <div className="flex">
@@ -54,8 +75,8 @@ export default function ProductCard({ product }) {
                 key={i}
                 className={`h-4 w-4 ${
                   i < Math.floor(product.rating)
-                    ? 'fill-yellow-400 text-yellow-400'
-                    : 'text-gray-300'
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "text-gray-300"
                 }`}
               />
             ))}
@@ -83,7 +104,9 @@ export default function ProductCard({ product }) {
           size="sm"
         >
           <ShoppingCart className="h-4 w-4 mr-2" />
-          {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+          {product.stock === 0
+            ? t("button_cart_card_1")
+            : t("button_cart_card_2")}
         </Button>
       </div>
     </motion.div>

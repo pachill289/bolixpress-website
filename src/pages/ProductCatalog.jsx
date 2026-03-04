@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { getAllProductsRequest } from "@/services/product.service";
 import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 import { Search, Filter, Loader2 } from "lucide-react";
@@ -10,104 +12,15 @@ import FilterSidebar from "@/components/FilterSidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Mock product data
-const mockProducts = [
-  {
-    id: "1",
-    name: "Wireless Bluetooth Headphones",
-    price: 79.99,
-    original_price: 129.99,
-    category: "Electronics",
-    brand: "TechSound",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-    rating: 4.5,
-    stock: 45,
-  },
-  {
-    id: "2",
-    name: "Smart Fitness Watch",
-    price: 199.99,
-    original_price: 299.99,
-    category: "Electronics",
-    brand: "FitTech",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-    rating: 4.8,
-    stock: 23,
-  },
-  {
-    id: "3",
-    name: "Premium Leather Wallet",
-    price: 49.99,
-    original_price: null,
-    category: "Accessories",
-    brand: "LeatherCraft",
-    image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=500",
-    rating: 4.3,
-    stock: 67,
-  },
-  {
-    id: "4",
-    name: "Portable Power Bank 20000mAh",
-    price: 39.99,
-    original_price: 59.99,
-    category: "Electronics",
-    brand: "PowerPlus",
-    image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500",
-    rating: 4.6,
-    stock: 89,
-  },
-  {
-    id: "5",
-    name: "Designer Sunglasses",
-    price: 149.99,
-    original_price: 249.99,
-    category: "Accessories",
-    brand: "StyleVision",
-    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500",
-    rating: 4.7,
-    stock: 34,
-  },
-  {
-    id: "6",
-    name: "Mechanical Gaming Keyboard",
-    price: 129.99,
-    original_price: 179.99,
-    category: "Electronics",
-    brand: "GameGear",
-    image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500",
-    rating: 4.9,
-    stock: 15,
-  },
-  {
-    id: "7",
-    name: "Minimalist Backpack",
-    price: 69.99,
-    original_price: null,
-    category: "Accessories",
-    brand: "UrbanCarry",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500",
-    rating: 4.4,
-    stock: 52,
-  },
-  {
-    id: "8",
-    name: "Wireless Mouse",
-    price: 29.99,
-    original_price: 49.99,
-    category: "Electronics",
-    brand: "TechGear",
-    image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500",
-    rating: 4.2,
-    stock: 78,
-  },
-];
-
 export default function ProductCatalog() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const { isAuthenticated } = useAuth();
+
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
 
   const [filters, setFilters] = useState({
     search: "",
@@ -116,21 +29,34 @@ export default function ProductCatalog() {
     priceRange: [0, 1000],
   });
 
-  const categories = [...new Set(mockProducts.map((p) => p.category))];
-  const brands = [...new Set(mockProducts.map((p) => p.brand))];
-
+  // Obtención de prodcutos por la API Rest
   useEffect(() => {
-    // Simulate data fetching
     const fetchProducts = async () => {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setProducts(mockProducts);
-      setFilteredProducts(mockProducts);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const data = await getAllProductsRequest();
+        const formattedProducts = data.map((p) => ({
+          ...p,
+          price: Number(p.price),
+          original_price: p.original_price ? Number(p.original_price) : null,
+          rating: Number(p.rating),
+          stock: Number(p.stock),
+        }));
+
+        setProducts(formattedProducts);
+        setFilteredProducts(formattedProducts);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchProducts();
   }, []);
+
+  const categories = [...new Set(products.map((p) => p.category))];
+  const brands = [...new Set(products.map((p) => p.brand))];
 
   useEffect(() => {
     let result = [...products];
@@ -181,21 +107,21 @@ export default function ProductCatalog() {
 
         <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-4">All Products</h1>
+            <h1 className="text-3xl font-bold mb-4">{t("products_title")}</h1>
 
             {!isAuthenticated && (
               <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-950/50 text-blue-800 dark:text-blue-200 rounded-lg border border-blue-200 dark:border-blue-900">
                 <p className="text-sm">
-                  <strong>Notice:</strong> You can browse our catalog, but
-                  please{" "}
+                  <strong>{t("products_subtitle_1")}</strong>{" "}
+                  {t("products_subtitle_2")}{" "}
                   <Link to="/login" className="underline font-semibold">
-                    log in
+                    {t("products_subtitle_3")}
                   </Link>{" "}
-                  or{" "}
+                  {t("products_subtitle_4")}{" "}
                   <Link to="/register" className="underline font-semibold">
-                    register
+                    {t("products_subtitle_5")}
                   </Link>{" "}
-                  to add items to your cart.
+                  {t("products_subtitle_6")}
                 </p>
               </div>
             )}
@@ -206,7 +132,7 @@ export default function ProductCatalog() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder={t("products_search_placeholder")}
                   value={filters.search}
                   onChange={(e) =>
                     setFilters({ ...filters, search: e.target.value })
@@ -246,7 +172,7 @@ export default function ProductCatalog() {
               ) : filteredProducts.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground mb-4">
-                    No products found
+                    {t("msg_cart_filter_1")}
                   </p>
                   <Button
                     onClick={() =>
@@ -258,7 +184,7 @@ export default function ProductCatalog() {
                       })
                     }
                   >
-                    Clear Filters
+                    {t("msg_cart_filter_2")}
                   </Button>
                 </div>
               ) : (

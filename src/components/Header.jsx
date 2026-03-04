@@ -45,8 +45,8 @@ export default function Header() {
     try {
       await logout();
       toast({
-        title: "Logged out",
-        description: "You have been successfully logged out",
+        title: t("msg_logout_1"),
+        description: t("submsg_logout_1"),
       });
       navigate("/");
     } catch (error) {

@@ -1,10 +1,13 @@
-import React from 'react';
-import { Minus, Plus, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/contexts/CartContext";
 
 export default function CartItem({ item }) {
   const { updateQuantity, removeFromCart } = useCart();
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
 
   return (
     <div className="flex gap-4 py-4 border-b">
@@ -17,7 +20,7 @@ export default function CartItem({ item }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold mb-1">{item.name}</h3>
+        <h3 className="font-semibold mb-1">{t(item.name)}</h3>
         <p className="text-sm text-muted-foreground mb-2">{item.category}</p>
         <div className="flex items-baseline gap-2">
           <span className="font-bold text-lg">${item.price.toFixed(2)}</span>

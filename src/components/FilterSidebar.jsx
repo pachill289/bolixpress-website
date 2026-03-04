@@ -1,21 +1,24 @@
-import React from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
-export default function FilterSidebar({ 
-  filters, 
-  setFilters, 
-  categories, 
+export default function FilterSidebar({
+  filters,
+  setFilters,
+  categories,
   brands,
-  onClose 
+  onClose,
 }) {
+  // constante t para definir el cambio de idioma
+  const { t } = useTranslation();
   const handlePriceChange = (value) => {
     setFilters((prev) => ({
       ...prev,
-      priceRange: value
+      priceRange: value,
     }));
   };
 
@@ -24,7 +27,7 @@ export default function FilterSidebar({
       ...prev,
       categories: prev.categories.includes(category)
         ? prev.categories.filter((c) => c !== category)
-        : [...prev.categories, category]
+        : [...prev.categories, category],
     }));
   };
 
@@ -33,29 +36,34 @@ export default function FilterSidebar({
       ...prev,
       brands: prev.brands.includes(brand)
         ? prev.brands.filter((b) => b !== brand)
-        : [...prev.brands, brand]
+        : [...prev.brands, brand],
     }));
   };
 
   const clearFilters = () => {
     setFilters({
-      search: '',
+      search: "",
       categories: [],
       brands: [],
-      priceRange: [0, 1000]
+      priceRange: [0, 1000],
     });
   };
 
   return (
     <div className="bg-card border rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold">Filters</h2>
+        <h2 className="text-lg font-semibold">{t("products_title_filters")}</h2>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear All
+            {t("products_clear_filters_button")}
           </Button>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} className="lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="lg:hidden"
+            >
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -64,7 +72,7 @@ export default function FilterSidebar({
 
       {/* Price Range */}
       <div className="mb-6">
-        <h3 className="font-medium mb-3">Price Range</h3>
+        <h3 className="font-medium mb-3">{t("products_price_range_title")}</h3>
         <Slider
           value={filters.priceRange}
           onValueChange={handlePriceChange}
@@ -80,7 +88,7 @@ export default function FilterSidebar({
 
       {/* Categories */}
       <div className="mb-6">
-        <h3 className="font-medium mb-3">Categories</h3>
+        <h3 className="font-medium mb-3">{t("products_categories_title")}</h3>
         <div className="space-y-2">
           {categories.map((category) => (
             <div key={category} className="flex items-center space-x-2">
@@ -102,7 +110,7 @@ export default function FilterSidebar({
 
       {/* Brands */}
       <div>
-        <h3 className="font-medium mb-3">Brands</h3>
+        <h3 className="font-medium mb-3">{t("products_brands_title")}</h3>
         <div className="space-y-2">
           {brands.map((brand) => (
             <div key={brand} className="flex items-center space-x-2">
